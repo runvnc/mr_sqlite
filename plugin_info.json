@@ -1,0 +1,18 @@
+{
+  "name": "MindRoot SQLite Database Integration",
+  "version": "0.1.0",
+  "description": "Integrates SQLite database functionality into MindRoot agents with zero data retention and Supabase-compatible filters",
+  "services": [
+    "get_db_client",
+    "db_inject_schema_info"
+  ],
+  "commands": [
+    "query_db",
+    "insert_db",
+    "update_db",
+    "delete_db",
+    "list_db_tables",
+    "describe_db_table",
+    "get_db_relationships"
+  ]
+}
