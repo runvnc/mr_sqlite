@@ -1,4 +1,3 @@
-sqlite3
 
 [dev]
 pytest>=6.0
