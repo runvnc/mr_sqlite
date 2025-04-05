@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: mr_sqlite
+Version: 0.1.0
+Summary: MindRoot SQLite Database Integration
+Author: MindRoot
+Author-email: info@mindroot.ai
+License: MIT
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: sqlite3
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0; extra == "dev"
+Requires-Dist: black>=22.3.0; extra == "dev"
+Dynamic: author
+Dynamic: author-email
+Dynamic: requires-python

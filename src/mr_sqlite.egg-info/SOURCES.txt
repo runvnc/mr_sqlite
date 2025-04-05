@@ -1,0 +1,14 @@
+pyproject.toml
+setup.py
+src/mr_sqlite/__init__.py
+src/mr_sqlite/client.py
+src/mr_sqlite/mod.py
+src/mr_sqlite/utils.py
+src/mr_sqlite.egg-info/PKG-INFO
+src/mr_sqlite.egg-info/SOURCES.txt
+src/mr_sqlite.egg-info/dependency_links.txt
+src/mr_sqlite.egg-info/requires.txt
+src/mr_sqlite.egg-info/top_level.txt
+src/mr_sqlite/filters/__init__.py
+src/mr_sqlite/filters/operators.py
+src/mr_sqlite/filters/parser.py

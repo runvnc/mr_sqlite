@@ -10,7 +10,6 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 dependencies = [
-    "sqlite3",
 ]
 
 [project.optional-dependencies]
