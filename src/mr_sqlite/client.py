@@ -31,7 +31,7 @@ class SQLiteClient:
             # Use in-memory database if specified
             if in_memory_mode:
                 print("SQLite running in in-memory mode (zero data retention)")
-                db_path = ':memory:'
+                db_path = 'file:mindroot_shared_db?mode=memory&cache=shared'
             # Otherwise use default paths if not specified
             elif db_path is None:
                 os.makedirs(DEFAULT_DB_DIR, exist_ok=True)
@@ -57,14 +57,20 @@ class SQLiteClient:
         self._initialize_db()
     
     def _initialize_db(self):
-        """Initialize the SQLite database connection and schema."""
+        """Initialize the SQLite database connection and schema. Uses shared memory for in-memory mode."""
         # Create directory if it doesn't exist
         if self.db_path != ':memory:':
             db_dir = os.path.dirname(self.db_path)
             os.makedirs(db_dir, exist_ok=True)
         
         # Connect to database
-        self.conn = sqlite3.connect(self.db_path)
+        # Use URI mode for shared memory database
+        if self.db_path.startswith('file:'):
+            print(f"Connecting to shared memory database: {self.db_path}")
+            self.conn = sqlite3.connect(self.db_path, uri=True)
+        else:
+            self.conn = sqlite3.connect(self.db_path)
+            
         # Enable foreign keys
         self.conn.execute("PRAGMA foreign_keys = ON")
         # Configure for better performance
