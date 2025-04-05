@@ -17,6 +17,10 @@ class SQLiteClient:
     _instance = None
     
     @classmethod
+    def reset_instance(cls):
+        cls._instance = None
+    
+    @classmethod
     def get_instance(cls, db_path=None, schema_path=None) -> 'SQLiteClient':
         """Get or create a singleton instance of the SQLite client.
         
@@ -24,6 +28,12 @@ class SQLiteClient:
             db_path: Optional path to SQLite database file
             schema_path: Optional path to SQL schema file
         """
+        # If we're explicitly requesting a different database, reset the instance
+        if cls._instance is not None and db_path is not None and cls._instance.db_path != db_path:
+            print(f"Resetting SQLite client instance because db_path changed from {cls._instance.db_path} to {db_path}")
+            cls.reset_instance()
+        
+        # Create a new instance if needed
         if cls._instance is None:
             # Check for in-memory mode environment variable
             in_memory_mode = os.environ.get("SQLITE_IN_MEMORY", "false").lower() == "true"
@@ -31,6 +41,9 @@ class SQLiteClient:
             # Use in-memory database if specified
             if in_memory_mode:
                 print("SQLite running in in-memory mode (zero data retention)")
+                # Always use the shared memory database in in-memory mode
+                db_path = 'file:mindroot_shared_db?mode=memory&cache=shared'
+            elif db_path is not None and db_path.startswith('file:'):
                 db_path = 'file:mindroot_shared_db?mode=memory&cache=shared'
             # Otherwise use default paths if not specified
             elif db_path is None:
@@ -58,13 +71,14 @@ class SQLiteClient:
     
     def _initialize_db(self):
         """Initialize the SQLite database connection and schema. Uses shared memory for in-memory mode."""
-        # Create directory if it doesn't exist
-        if self.db_path != ':memory:':
+        # Create directory if it doesn't exist (only for file-based databases)
+        if self.db_path != ':memory:' and not self.db_path.startswith('file:'):
             db_dir = os.path.dirname(self.db_path)
             os.makedirs(db_dir, exist_ok=True)
         
         # Connect to database
         # Use URI mode for shared memory database
+        print(f"Connecting to database: {self.db_path}")
         if self.db_path.startswith('file:'):
             print(f"Connecting to shared memory database: {self.db_path}")
             self.conn = sqlite3.connect(self.db_path, uri=True)
