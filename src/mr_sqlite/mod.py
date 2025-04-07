@@ -1,6 +1,7 @@
 from lib.providers.services import service
 from lib.providers.commands import command
 from lib.pipelines.pipe import pipe
+import asyncio
 from typing import Dict, List, Any, Optional, Union
 import os
 import json
@@ -15,6 +16,9 @@ from .utils import (
     format_error_response
 )
 from lib.utils.debug import debug_box
+
+# Create a global lock for database write operations
+db_write_lock = asyncio.Lock()
 
 # Initialize SQLite client service
 @service()
@@ -190,12 +194,15 @@ async def insert_db(table: str, data: Dict[str, Any], context=None):
     Example:
         {"insert_db": {"table": "tasks", "data": {"title": "New task", "status": "pending"}}}
     """
+    # This is a write operation, so we need to acquire the lock
     try:
         db_client = await get_db_client()
         if not db_client:
             return "Error: Database client unavailable"
 
-        result = db_client.insert_record(table=table, data=data)
+        # Use the lock to ensure only one write operation happens at a time
+        async with db_write_lock:
+            result = db_client.insert_record(table=table, data=data)
 
         if not result:
             return f"Record was inserted into '{table}', but no data was returned."
@@ -203,6 +210,8 @@ async def insert_db(table: str, data: Dict[str, Any], context=None):
         formatted_result = json.dumps(result, indent=2)
         return f"Successfully inserted record into '{table}':\n\n```json\n{formatted_result}\n```"
 
+    except asyncio.CancelledError:
+        return "Operation was cancelled while waiting for database lock."
     except Exception as e:
         return format_error_response(e)
 @command()
@@ -221,17 +230,20 @@ async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = 
     Example:
         {"update_db": {"table": "tasks", "data": {"status": "completed"}, "filters": {"id": 123}}}
     """
+    # This is a write operation, so we need to acquire the lock
     try:
         db_client = await get_db_client()
         if not db_client:
             return "Error: Database client unavailable"
 
-        results = db_client.update_records(
-            table=table,
-            data=data,
-            filters=filters or {},
-            raw_filters=raw_filters
-        )
+        # Use the lock to ensure only one write operation happens at a time
+        async with db_write_lock:
+            results = db_client.update_records(
+                table=table,
+                data=data,
+                filters=filters or {},
+                raw_filters=raw_filters
+            )
 
         if not results:
             return f"No records in '{table}' were updated matching the filter criteria."
@@ -240,6 +252,8 @@ async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = 
         formatted_results = json.dumps(results, indent=2)
         return f"Successfully updated {count} record(s) in '{table}':\n\n```json\n{formatted_results}\n```"
 
+    except asyncio.CancelledError:
+        return "Operation was cancelled while waiting for database lock."
     except Exception as e:
         return format_error_response(e)
 
@@ -258,16 +272,19 @@ async def delete_db(table: str, filters: Dict[str, Any] = None,
     Example:
         {"delete_db": {"table": "tasks", "filters": {"id": 123}}}
     """
+    # This is a write operation, so we need to acquire the lock
     try:
         db_client = await get_db_client()
         if not db_client:
             return "Error: Database client unavailable"
 
-        results = db_client.delete_records(
-            table=table,
-            filters=filters or {},
-            raw_filters=raw_filters
-        )
+        # Use the lock to ensure only one write operation happens at a time
+        async with db_write_lock:
+            results = db_client.delete_records(
+                table=table,
+                filters=filters or {},
+                raw_filters=raw_filters
+            )
 
         if not results:
             return f"No records in '{table}' were deleted matching the filter criteria."
@@ -276,6 +293,8 @@ async def delete_db(table: str, filters: Dict[str, Any] = None,
         formatted_results = json.dumps(results, indent=2)
         return f"Successfully deleted {count} record(s) from '{table}':\n\n```json\n{formatted_results}\n```"
 
+    except asyncio.CancelledError:
+        return "Operation was cancelled while waiting for database lock."
     except Exception as e:
         return format_error_response(e)
 @command()
