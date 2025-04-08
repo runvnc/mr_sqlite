@@ -237,20 +237,19 @@ async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = 
             return "Error: Database client unavailable"
 
         # Use the lock to ensure only one write operation happens at a time
+        rowcount = 0
         async with db_write_lock:
-            results = db_client.update_records(
+            rowcount = db_client.update_records(
                 table=table,
                 data=data,
                 filters=filters or {},
                 raw_filters=raw_filters
             )
 
-        if not results:
+        if rowcount == 0:
             return f"No records in '{table}' were updated matching the filter criteria."
 
-        count = len(results)
-        formatted_results = json.dumps(results, indent=2)
-        return f"Successfully updated {count} record(s) in '{table}':\n\n```json\n{formatted_results}\n```"
+        return f"Successfully updated {count} record(s) in '{table}'"
 
     except asyncio.CancelledError:
         return "Operation was cancelled while waiting for database lock."
