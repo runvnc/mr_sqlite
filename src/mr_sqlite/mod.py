@@ -249,7 +249,7 @@ async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = 
         if rowcount == 0:
             return f"No records in '{table}' were updated matching the filter criteria."
 
-        return f"Successfully updated {count} record(s) in '{table}'"
+        return f"Successfully updated {rowcount} record(s) in '{table}'"
 
     except asyncio.CancelledError:
         return "Operation was cancelled while waiting for database lock."
