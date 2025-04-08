@@ -231,7 +231,7 @@ class SQLiteClient:
             raw_filters: Raw filters in the format "column.operator.value,column.operator.value"
             
         Returns:
-            List of updated records
+            Count of updated records
         """
         # Get records before update
         records_before = self.query_table(table, filters=filters, raw_filters=raw_filters)
@@ -264,12 +264,14 @@ class SQLiteClient:
             query += " WHERE " + " AND ".join(where_clauses)
         
         # Execute update
+        # we need to record the number of updated records
+        updated_count = 0
         with self.get_cursor() as cursor:
             cursor.execute(query, params)
-        
-        # Get updated records
-        return self.query_table(table, filters=filters, raw_filters=raw_filters)
-    
+            updated_count = cursor.rowcount
+       
+        return updated_count
+
     def delete_records(
         self,
         table: str,
