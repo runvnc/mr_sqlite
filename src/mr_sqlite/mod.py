@@ -193,6 +193,11 @@ async def insert_db(table: str, data: Dict[str, Any], context=None):
 
     Example:
         {"insert_db": {"table": "tasks", "data": {"title": "New task", "status": "pending"}}}
+
+    WARNING: Be VERY careful with escaping in the data field. Note that this has to be valid
+    JSON. Don't include unnecessary newlines/indendation, and make sure that strings are properly
+    escapped!
+ 
     """
     # This is a write operation, so we need to acquire the lock
     try:
@@ -214,6 +219,7 @@ async def insert_db(table: str, data: Dict[str, Any], context=None):
         return "Operation was cancelled while waiting for database lock."
     except Exception as e:
         return format_error_response(e)
+
 @command()
 async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = None, 
                    raw_filters: str = None, context=None):
@@ -229,6 +235,10 @@ async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = 
 
     Example:
         {"update_db": {"table": "tasks", "data": {"status": "completed"}, "filters": {"id": 123}}}
+
+    WARNING: Be VERY careful with escaping in the data field. Note that this has to be valid
+    JSON. Don't include unnecessary newlines/indendation, and make sure that strings are properly
+    escapped!
     """
     # This is a write operation, so we need to acquire the lock
     try:
