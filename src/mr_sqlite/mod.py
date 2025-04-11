@@ -192,7 +192,7 @@ async def insert_db(table: str, data: Dict[str, Any], context=None):
         data: Dictionary of column-value pairs
 
     Example:
-        {"insert_db": {"table": "tasks", "data": {"title": "New task", "status": "pending"}}}
+        {"insert_db": {"table": "tasks", "data": {"title": "New task", "status": "pending"} } }
 
     WARNING: Be VERY careful with escaping in the data field. Note that this has to be valid
     JSON. Don't include unnecessary newlines/indendation, and make sure that strings are properly
