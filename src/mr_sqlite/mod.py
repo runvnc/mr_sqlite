@@ -234,11 +234,17 @@ async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = 
                     Example: "status.eq.active,created_at.gt.2025-01-01,email.like.%example.com"
 
     Example:
-        {"update_db": {"table": "tasks", "data": {"status": "completed"}, "filters": {"id": 123}}}
+        { "update_db":
+            {  "table": "tasks", "data": {"status": "completed"}, 
+               "filters": {"id": 123 }
+            }
+        }
 
     WARNING: Be VERY careful with escaping in the data field. Note that this has to be valid
     JSON. Don't include unnecessary newlines/indendation, and make sure that strings are properly
-    escapped!
+    escaped!
+
+    REMINDER: count the number of curly braces!
 
     Warning: Multiline String Handling in update_db or insert_db
 
