@@ -254,12 +254,6 @@ async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = 
     In strings, DO encode newlines as \n (a single backslash followed by 'n').
     In strings, DO escape internal double quotes as ".
     DO NOT use unescaped multiline formatting or raw line breaks.
-    Example:
-
-    Correct: "claim_document_summary": "Line one.\nLine two.\nLine three with a quote: \"example\"."
-
-    Incorrect: "claim_document_summary": "Line one. 
-    Line two. Line three with a quote: "example"."
 
     This applies to all string fields in update_db that may contain multiple paragraphs or formatted text.
     """
