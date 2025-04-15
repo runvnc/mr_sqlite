@@ -135,6 +135,7 @@ async def db_inject_schema_info(agent_name: str, tables: List[str] = None):
         trace = traceback.format_exc()
         print(f"Error injecting schema info: {str(e)}\n{trace}")
         return None
+
 # DB Commands
 @command()
 async def query_db(table: str, select: str = "*", filters: Dict[str, Any] = None, 
@@ -495,11 +496,7 @@ async def inject_db_schema(data: dict, context=None) -> dict:
                 system_msg['content'] += delimited_schema
                 debug_box("Added schema to system message content")
             elif isinstance(system_msg.get('content'), list):
-                # Handle multipart messages
-                system_msg['content'].append({
-                    "type": "text",
-                    "text": delimited_schema
-                })
+                system_msg['content'][0]['text'] += "\n\n" + delimited_schema
 
             debug_box("Schema injection complete")
         else:
