@@ -3,6 +3,7 @@ import sqlite3
 from typing import Dict, List, Any, Optional, Union, Tuple
 import json
 from contextlib import contextmanager
+from lib.utils.debug import debug_box
 
 from .filters.parser import FilterParser
 
@@ -71,6 +72,7 @@ class SQLiteClient:
     
     def _initialize_db(self):
         """Initialize the SQLite database connection and schema. Uses shared memory for in-memory mode."""
+        debug_box("SQLITE ---------------------------")
         # Create directory if it doesn't exist (only for file-based databases)
         if self.db_path != ':memory:' and not self.db_path.startswith('file:'):
             db_dir = os.path.dirname(self.db_path)
