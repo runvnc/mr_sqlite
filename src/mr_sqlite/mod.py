@@ -31,10 +31,14 @@ async def get_db_client(db_path=None, schema_path=None):
         schema_path: Optional path to SQL schema file
     """
     try:
-        # Always use the shared memory database for consistency with claims module
+        in_memory_mode = os.environ.get("SQLITE_IN_MEMORY", "false").lower() == "true"
+         
         if db_path is None:
-            db_path = 'file:mindroot_shared_db?mode=memory&cache=shared'
-            
+            if in_memory_mode:
+                db_path = 'file:mindroot_shared_db?mode=memory&cache=shared'
+            else: 
+                db_path = os.path.join(DEFAULT_DB_DIR, DEFAULT_DB_FILE)
+
         return SQLiteClient.get_instance(db_path, schema_path)
     except Exception as e:
         print(f"Error initializing SQLite client: {e}")
