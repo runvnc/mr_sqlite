@@ -150,6 +150,7 @@ class SQLiteClient:
         Returns:
             List of records matching the criteria
         """
+        debug_box(f"SQLITE -------------------------  dbpath: {self.db_path}")
         # Build query
         query = f"SELECT {select} FROM {table}"
         params = []
