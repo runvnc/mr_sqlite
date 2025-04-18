@@ -179,11 +179,9 @@ async def query_db(table: str, select: str = "*", filters: Dict[str, Any] = None
 
         # Format results
         if not results:
-            return f"No records found in table '{table}' matching the criteria."
+            return []
 
-        # Return as formatted string (easier for AI to read)
-        formatted_results = json.dumps(results, indent=2)
-        return f"Query results from '{table}':\n\n```json\n{formatted_results}\n```"
+        return results
 
     except Exception as e:
         return format_error_response(e)
@@ -200,9 +198,12 @@ async def insert_db(table: str, data: Dict[str, Any], context=None):
         {"insert_db": {"table": "tasks", "data": {"title": "New task", "status": "pending"} } }
 
     WARNING: Be VERY careful with escaping in the data field. Note that this has to be valid
-    JSON. Don't include unnecessary newlines/indendation, and make sure that strings are properly
-    escapped!
- 
+    JSON for simple updates, or use RAW format for multiline string fields. 
+    Don't include unnecessary newlines/indendation, and make sure that strings are properly
+    escaped if using JSON.
+    For multiline string fields, use START_RAW and END_RAW with unescaped text as shown in 
+    the examples in your other instructions.
+
     """
     # This is a write operation, so we need to acquire the lock
     try:
@@ -218,7 +219,7 @@ async def insert_db(table: str, data: Dict[str, Any], context=None):
             return f"Record was inserted into '{table}', but no data was returned."
 
         formatted_result = json.dumps(result, indent=2)
-        return f"Successfully inserted record into '{table}':\n\n```json\n{formatted_result}\n```"
+        return f"Successfully inserted record into '{table}'"
 
     except asyncio.CancelledError:
         return "Operation was cancelled while waiting for database lock."
@@ -246,21 +247,13 @@ async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = 
         }
 
     WARNING: Be VERY careful with escaping in the data field. Note that this has to be valid
-    JSON. Don't include unnecessary newlines/indendation, and make sure that strings are properly
-    escaped!
+    JSON for simple updates, or use RAW format for multiline string fields. 
+    Don't include unnecessary newlines/indendation, and make sure that strings are properly
+    escaped if using JSON.
 
-    REMINDER: count the number of curly braces!
+    For multiline string fields, use START_RAW and END_RAW with unescaped text as shown in 
+    the examples in your other instructions.
 
-    Warning: Multiline String Handling in update_db or insert_db
-
-    When updating fields that contain multiline text (e.g., summaries, notes, or quotes), you must ensure the string is properly escaped to conform to JSON standards. Failure to do so will result in parsing errors.
-
-    DO NOT include actual newline characters in the JSON string.
-    In strings, DO encode newlines as \n (a single backslash followed by 'n').
-    In strings, DO escape internal double quotes as ".
-    DO NOT use unescaped multiline formatting or raw line breaks.
-
-    This applies to all string fields in update_db that may contain multiple paragraphs or formatted text.
     """
     # This is a write operation, so we need to acquire the lock
     try:
@@ -322,7 +315,7 @@ async def delete_db(table: str, filters: Dict[str, Any] = None,
 
         count = len(results)
         formatted_results = json.dumps(results, indent=2)
-        return f"Successfully deleted {count} record(s) from '{table}':\n\n```json\n{formatted_results}\n```"
+        return f"Successfully deleted {count} record(s) from '{table}'"
 
     except asyncio.CancelledError:
         return "Operation was cancelled while waiting for database lock."
