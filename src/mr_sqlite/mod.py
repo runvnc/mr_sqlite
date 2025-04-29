@@ -197,7 +197,7 @@ async def insert_db(table: str, data: Dict[str, Any], context=None):
     Example:
         {"insert_db": {"table": "tasks", "data": {"title": "New task", "status": "pending"} } }
 
-    WARNING: Be VERY careful with escaping in the data field. Note that this has to be valid
+    WARNING: Be careful with escaping in the data field. Note that this has to be valid
     JSON for simple updates, or use RAW format for multiline string fields. 
     Don't include unnecessary newlines/indendation, and make sure that strings are properly
     escaped if using JSON.
@@ -241,15 +241,16 @@ async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = 
 
     Example:
         { "update_db":
-            {  "table": "tasks", "data": {"status": "completed"}, 
-               "filters": {"id": 123 }
+            {
+               "filters": {"id": 123 },
+                "table": "tasks", "data": {"status": "completed"}
             }
         }
 
-    WARNING: Be VERY careful with escaping in the data field. Note that this has to be valid
+    WARNING: Be careful with escaping in the data field. Note that this has to be valid
     JSON for simple updates, or use RAW format for multiline string fields. 
     Don't include unnecessary newlines/indendation, and make sure that strings are properly
-    escaped if using JSON.
+    escaped if using not using RAW mode.
 
     For multiline string fields, use START_RAW and END_RAW with unescaped text as shown in 
     the examples in your other instructions.
