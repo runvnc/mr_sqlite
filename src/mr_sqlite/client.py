@@ -275,6 +275,54 @@ class SQLiteClient:
        
         return updated_count
 
+    def update_one_record(
+        self,
+        table: str,
+        data: Dict[str, Any],
+        filters: Dict[str, Any],
+        raw_filters: Optional[str] = None
+    ) -> int:
+        """Update exactly one record in a table with built-in LIMIT 1 safety.
+        
+        Args:
+            table: Name of the table to update
+            data: Dictionary of column-value pairs to update
+            filters: Dictionary of column-value pairs to filter by
+            raw_filters: Raw filters in the format "column.operator.value,column.operator.value"
+            
+        Returns:
+            Count of updated records (will be 0 or 1)
+        """
+        # Build update query with LIMIT 1
+        set_clause = ", ".join([f"{col} = ?" for col in data.keys()])
+        query = f"UPDATE {table} SET {set_clause}"
+        params = list(data.values())
+        
+        where_clauses = []
+        
+        # Apply simple filters
+        if filters:
+            for column, value in filters.items():
+                where_clauses.append(f"{column} = ?")
+                params.append(value)
+        
+        # Apply raw filters
+        if raw_filters:
+            raw_where, raw_params = FilterParser.parse_raw_filters(raw_filters)
+            if raw_where:
+                where_clauses.append(raw_where)
+                params.extend(raw_params)
+        
+        # Add WHERE clause and LIMIT 1
+        if where_clauses:
+            query += " WHERE " + " AND ".join(where_clauses)
+        query += " LIMIT 1"
+        
+        # Execute update
+        with self.get_cursor() as cursor:
+            cursor.execute(query, params)
+            return cursor.rowcount
+
     def delete_records(
         self,
         table: str,

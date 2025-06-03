@@ -10,6 +10,7 @@
     "query_db",
     "insert_db",
     "update_db",
+    "update_one_db",
     "delete_db",
     "list_db_tables",
     "describe_db_table",

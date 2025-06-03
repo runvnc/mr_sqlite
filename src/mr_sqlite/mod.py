@@ -277,6 +277,61 @@ async def update_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = 
         return format_error_response(e)
 
 @command()
+async def update_one_db(table: str, data: Dict[str, Any], filters: Dict[str, Any] = None, 
+                       raw_filters: str = None, context=None):
+    """Update exactly one record in a database table with built-in LIMIT 1 safety.
+    
+    This command ensures that only one record is updated, even if multiple records
+    match the filter criteria. This provides safety against accidental bulk updates.
+
+    Args:
+        table: Name of the table to update
+        data: Dictionary of column-value pairs to update
+        filters: Dictionary of column-value pairs to filter by using equality (column = value)
+        raw_filters: Comma-separated list of raw filter expressions in the format 
+                    "column.operator.value". Supports all Supabase filter operators.
+                    Example: "status.eq.active,created_at.gt.2025-01-01,email.like.%example.com"
+
+    Example:
+        { "update_one_db":
+            {
+               "filters": {"id": 123 },
+                "table": "tasks", "data": {"status": "completed"}
+            }
+        }
+
+    WARNING: Be careful with escaping in the data field. Note that this has to be valid
+    JSON. 
+    Don't include unnecessary newlines/indendation, and make sure that strings are properly
+    escaped.
+    """
+    # This is a write operation, so we need to acquire the lock
+    try:
+        db_client = await get_db_client()
+        if not db_client:
+            return "Error: Database client unavailable"
+
+        # Use the lock to ensure only one write operation happens at a time
+        rowcount = 0
+        async with db_write_lock:
+            rowcount = db_client.update_one_record(
+                table=table,
+                data=data,
+                filters=filters or {},
+                raw_filters=raw_filters
+            )
+
+        if rowcount == 0:
+            return f"No records in '{table}' were updated matching the filter criteria."
+
+        return f"Successfully updated exactly 1 record in '{table}' (LIMIT 1 enforced)"
+
+    except asyncio.CancelledError:
+        return "Operation was cancelled while waiting for database lock."
+    except Exception as e:
+        return format_error_response(e)
+
+@command()
 async def delete_db(table: str, filters: Dict[str, Any] = None, 
                    raw_filters: str = None, context=None):
     """Delete records from a database table.
