@@ -32,11 +32,14 @@ async def get_db_client(db_path=None, schema_path=None):
     """
     try:
         in_memory_mode = os.environ.get("SQLITE_IN_MEMORY", "false").lower() == "true"
-         
+        sqlite_dir = os.environ.get("SQLITE_DIR")
+ 
         if db_path is None:
             if in_memory_mode:
                 db_path = 'file:mindroot_shared_db?mode=memory&cache=shared'
-            else: 
+            elif sqlite_dir:
+                db_path = os.path.join(sqlite_dir, DEFAULT_DB_FILE)
+            else:
                 db_path = os.path.join(DEFAULT_DB_DIR, DEFAULT_DB_FILE)
 
         return SQLiteClient.get_instance(db_path, schema_path)
